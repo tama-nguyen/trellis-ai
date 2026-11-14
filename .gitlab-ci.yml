@@ -1,0 +1,247 @@
+# trellis-ai pipeline. Design: plan/10-docker-gitlab-cicd.md part B, trimmed to one language.
+#
+#   MR pipeline       lint, type check, tests, image build tagged mr<iid>-<sha>. Caches read-only.
+#   main pipeline     the same, images tagged sha-<sha>, plus the uv cache warm-up (the only writer).
+#   tag v1.2.3        no rebuild: a release retags an image already tested on main (not set up yet).
+#
+# One file, no ci/ includes: this repo has a single toolchain, and splitting four jobs across five
+# files costs more to read than it saves. Add ci/<area>.yml when a second deployable appears.
+
+stages:
+  - lint
+  - test
+  - package
+
+workflow:
+  name: "$PIPELINE_NAME"
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        PIPELINE_NAME: "MR !$CI_MERGE_REQUEST_IID: $CI_MERGE_REQUEST_TITLE"
+    # A branch with an open MR already gets an MR pipeline; do not run a duplicate branch pipeline.
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+      when: never
+    # main is never auto-cancelled: every commit on main gets a complete, reproducible result.
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      auto_cancel:
+        on_new_commit: none
+      variables:
+        PIPELINE_NAME: "main $CI_COMMIT_SHORT_SHA"
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc\.\d+)?$/
+      variables:
+        PIPELINE_NAME: "release $CI_COMMIT_TAG"
+    - if: $CI_PIPELINE_SOURCE =~ /^(schedule|web|api)$/
+      variables:
+        PIPELINE_NAME: "$CI_PIPELINE_SOURCE on $CI_COMMIT_REF_NAME"
+    - if: $CI_COMMIT_BRANCH
+
+variables:
+  PIPELINE_NAME: "branch $CI_COMMIT_REF_NAME"
+  GIT_DEPTH: "50"
+  FF_USE_FASTZIP: "true"
+  # Pinned tool images (tag + digest). Bump tag and digest together; Renovate later.
+  UV_IMAGE: "ghcr.io/astral-sh/uv:0.13.8-python3.12-trixie-slim@sha256:ee8a8854267a3bd09ac0364420803fb74a069068b5fb279a2cf1df664f7273db"
+  DOCKER_CLI_IMAGE: "docker:29.9.3-cli@sha256:5a7af0dcb0e46c803efe9b45371dd21cb500e5b4453250394ac6f06d49b6e6f1"
+  DOCKER_DIND_IMAGE: "docker:29.9.3-dind@sha256:7bf70dcb85c822e3fa6f2d332143e474b99147b9d7b39102b0cfe8b04a7dd61b"
+  ALPINE_IMAGE: "alpine:3.24.4@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf"
+  # Worker image built from Dockerfile; one variable set per deployable when there are more.
+  WORKER_IMAGE_NAME: "worker-notice-stats"
+  WORKER_PACKAGE: "trellis-notice-stats"
+  WORKER_NAME: "notice-stats"
+  WORKER_EXTRAS: "postgres"
+
+default:
+  image: $ALPINE_IMAGE
+  interruptible: true
+  retry:
+    max: 2
+    when: [runner_system_failure, stuck_or_timeout_failure, api_failure, scheduler_failure]
+
+# --------------------------------------------------------------------------------------- building blocks
+.uv:
+  image: $UV_IMAGE
+  variables:
+    UV_CACHE_DIR: $CI_PROJECT_DIR/.cache/uv
+    UV_LINK_MODE: copy
+    # Once the contracts package is published (T22), uv reads it from the backend project's
+    # registry with these credentials; the index itself is declared in pyproject.toml.
+    # UV_INDEX_TRELLIS_CONTRACTS_USERNAME: gitlab-ci-token
+    # UV_INDEX_TRELLIS_CONTRACTS_PASSWORD: $CI_JOB_TOKEN
+  cache:
+    key:
+      prefix: uv
+      files: [uv.lock]
+    paths: [.cache/uv/]
+    policy: pull
+  before_script:
+    - uv sync --frozen
+
+.docker:
+  image: $DOCKER_CLI_IMAGE
+  services:
+    - name: $DOCKER_DIND_IMAGE
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: /certs
+    DOCKER_TLS_VERIFY: "1"
+    DOCKER_CERT_PATH: /certs/client
+  before_script:
+    - until docker info >/dev/null 2>&1; do echo "waiting for dind"; sleep 1; done
+
+# ------------------------------------------------------------------------------------------------- jobs
+# Computes the image tag once and hands it to the package stage as a dotenv artifact.
+ci:vars:
+  stage: .pre
+  needs: []
+  script:
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        IMAGE_TAG="$CI_COMMIT_TAG"
+      elif [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ]; then
+        IMAGE_TAG="mr${CI_MERGE_REQUEST_IID}-${CI_COMMIT_SHORT_SHA}"
+      else
+        IMAGE_TAG="sha-${CI_COMMIT_SHORT_SHA}"
+      fi
+      echo "IMAGE_TAG=$IMAGE_TAG" | tee build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+lint:lock:
+  extends: .uv
+  stage: lint
+  needs: []
+  # The lock must match every pyproject.toml in the workspace; a stale lock makes the image build
+  # (uv sync --frozen) fail far later and far less clearly.
+  before_script: []
+  script:
+    - uv lock --check
+
+lint:ruff:
+  extends: .uv
+  stage: lint
+  needs: []
+  script:
+    # The GitLab report is written first; on failure the human-readable output is printed too.
+    - uv run ruff check --output-format=gitlab --output-file=gl-code-quality-ruff.json . || { uv run ruff check .; exit 1; }
+    - uv run ruff format --check .
+  artifacts:
+    when: always
+    expire_in: 7 days
+    reports:
+      codequality: gl-code-quality-ruff.json
+
+lint:mypy:
+  extends: .uv
+  stage: lint
+  needs: []
+  script:
+    - uv run mypy
+
+test:unit:
+  extends: .uv
+  stage: test
+  needs: []
+  script:
+    # Exit 5 = nothing collected; tests are written only when asked (decision T5), so that passes.
+    - uv run pytest --junitxml=py-junit.xml --cov --cov-report=xml:coverage.xml || [ $? -eq 5 ]
+  coverage: '/^TOTAL.*\s(\d+(?:\.\d+)?)%/'
+  artifacts:
+    when: always
+    expire_in: 7 days
+    reports:
+      junit: py-junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+# tests/integration/ starts its own Postgres container and connects to it on 127.0.0.1. With the
+# DinD service, that container runs inside the dind daemon, so 127.0.0.1 in the job container is
+# not where Postgres listens: these tests cannot pass on a shared DinD runner. The job is therefore
+# **manual and allow_failure**; the supported way to run them today is locally
+# (`uv run pytest -m integration`, see AGENTS.md).
+#
+# To make it a real gate, give the project a runner with the host Docker socket mounted, then:
+# drop the `services`/DOCKER_HOST block and the docker CLI install below, and remove `when: manual`
+# and `allow_failure`.
+test:integration:
+  extends: .uv
+  stage: test
+  needs: []
+  when: manual
+  allow_failure: true
+  services:
+    - name: $DOCKER_DIND_IMAGE
+      alias: docker
+  variables:
+    UV_CACHE_DIR: $CI_PROJECT_DIR/.cache/uv
+    UV_LINK_MODE: copy
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: /certs
+    DOCKER_TLS_VERIFY: "1"
+    DOCKER_CERT_PATH: /certs/client
+  before_script:
+    # Debian packages the CLI only together with the engine; the engine here stays unused because
+    # DOCKER_HOST points at the dind service. A host-Docker runner removes this step entirely.
+    - apt-get update && apt-get install -y --no-install-recommends docker.io
+    - until docker info >/dev/null 2>&1; do echo "waiting for dind"; sleep 1; done
+    - uv sync --frozen
+  script:
+    - uv run pytest -m integration --junitxml=py-integration-junit.xml
+  artifacts:
+    when: always
+    expire_in: 7 days
+    reports:
+      junit: py-integration-junit.xml
+
+package:worker-image:
+  extends: .docker
+  stage: package
+  needs: [ci:vars, lint:ruff, lint:mypy, test:unit]
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker buildx create --use --driver docker-container --name trellis-builder >/dev/null
+    - IMG="$CI_REGISTRY_IMAGE/$WORKER_IMAGE_NAME"
+    # Registry build cache: every pipeline reads it, only main writes it (one writer).
+    - CACHE_TO=""
+    - if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then CACHE_TO="--cache-to=type=registry,ref=$IMG:buildcache,mode=max"; fi
+    - >-
+      docker buildx build
+      --file Dockerfile
+      --platform linux/amd64
+      --tag "$IMG:$IMAGE_TAG"
+      --cache-from "type=registry,ref=$IMG:buildcache"
+      $CACHE_TO
+      --build-arg "WORKER_PACKAGE=$WORKER_PACKAGE"
+      --build-arg "WORKER_NAME=$WORKER_NAME"
+      --build-arg "WORKER_EXTRAS=$WORKER_EXTRAS"
+      --build-arg "VERSION=$IMAGE_TAG"
+      --build-arg "REVISION=$CI_COMMIT_SHA"
+      --label "org.opencontainers.image.source=$CI_PROJECT_URL"
+      --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
+      --label "org.opencontainers.image.created=$CI_PIPELINE_CREATED_AT"
+      --sbom=true
+      --provenance=mode=max
+      --push
+      .
+    - echo "pushed $IMG:$IMAGE_TAG"
+
+cache:warm:uv:
+  extends: .uv
+  stage: lint
+  needs: []
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  cache:
+    key:
+      prefix: uv
+      files: [uv.lock]
+    paths: [.cache/uv/]
+    policy: pull-push
+  script:
+    - uv cache prune --ci
+  # Not a gate: a warm-up failure must not hide a real failure elsewhere or block main.
+  allow_failure: true

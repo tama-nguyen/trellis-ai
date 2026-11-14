@@ -1,4 +1,11 @@
-# Python build and tool output (kept here so the root .gitignore stays language-neutral)
+# OS / editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Python / uv
 .venv/
 __pycache__/
 *.py[cod]
@@ -8,5 +15,20 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# Test and coverage output
 coverage.xml
 .coverage
+py-junit.xml
+gl-code-quality-ruff.json
+
+# Local RAG indexes written by `trellis rag index` (default --store path)
+.trellis/
+
+# Env files: only the committed examples and non-secret dev defaults are tracked
+.env
+.env.*
+!.env.example
+
+# Claude Code local settings
+.claude/settings.local.json

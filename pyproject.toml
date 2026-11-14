@@ -1,9 +1,9 @@
-# uv workspace root for the Python side of Trellis (decision T14).
+# uv workspace root of trellis-ai (decisions T14, T21).
 # This project is virtual: it is never built or published. It exists to pin the shared toolchain
 # (ruff, mypy, pytest) and to pull every workspace member into one environment so `uv run` works
-# from this directory. Module rules: AGENTS.md next to this file.
+# from the repo root. Rules: AGENTS.md next to this file.
 [project]
-name = "trellis-workers-workspace"
+name = "trellis-ai-workspace"
 version = "0.0.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
@@ -11,9 +11,22 @@ dependencies = [
     "trellis-core",
     "trellis-events[kafka,postgres]",
     "trellis-sdk",
+    "trellis-rag",
     "trellis-cli",
     "trellis-notice-stats",
 ]
+# Published contracts (decision T22). Backend CI generates the pydantic event models and the
+# OpenAPI client and publishes them to the GitLab Package Registry; this repo pins a version
+# instead of generating anything. Until that package exists the generated code stays committed and
+# the schemas live in contracts-snapshot/ (see its README for the exact switch-over).
+#   dependencies += "trellis-contracts==0.1.0"
+# and uncomment the index below. CI authenticates with
+# UV_INDEX_TRELLIS_CONTRACTS_USERNAME=gitlab-ci-token and
+# UV_INDEX_TRELLIS_CONTRACTS_PASSWORD=$CI_JOB_TOKEN; no token is ever committed.
+# [[tool.uv.index]]
+# name = "trellis-contracts"
+# url = "https://gitlab.example.test/api/v4/projects/<backend-project-id>/packages/pypi/simple"
+# explicit = true  # only packages that ask for this index are fetched from it
 
 [dependency-groups]
 dev = [
@@ -33,12 +46,13 @@ package = false
 default-groups = ["dev"]
 
 [tool.uv.workspace]
-members = ["packages/*", "workers/*"]
+members = ["packages/*", "apps/*"]
 
 [tool.uv.sources]
 trellis-core = { workspace = true }
 trellis-events = { workspace = true }
 trellis-sdk = { workspace = true }
+trellis-rag = { workspace = true }
 trellis-cli = { workspace = true }
 trellis-notice-stats = { workspace = true }
 
@@ -48,7 +62,7 @@ trellis-notice-stats = { workspace = true }
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-src = ["packages/*/src", "workers/*/src", "tests"]
+src = ["packages/*/src", "apps/*/src", "tests"]
 # Generated code is checked by the generator's drift check, not reformatted or linted here.
 extend-exclude = [
     "packages/trellis-events/src/trellis_events/generated",
@@ -112,8 +126,8 @@ quote-style = "double"
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-mypy_path = "$MYPY_CONFIG_FILE_DIR/packages/trellis-core/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-events/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-sdk/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-cli/src:$MYPY_CONFIG_FILE_DIR/workers/notice-stats/src"
-files = ["packages/*/src", "workers/*/src", "tests"]
+mypy_path = "$MYPY_CONFIG_FILE_DIR/packages/trellis-core/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-events/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-sdk/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-cli/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-rag/src:$MYPY_CONFIG_FILE_DIR/apps/notice-stats/src"
+files = ["packages/*/src", "apps/*/src", "tests"]
 explicit_package_bases = true
 disallow_any_explicit = true
 disallow_any_unimported = true
@@ -146,9 +160,9 @@ filterwarnings = ["error"]
 xfail_strict = true
 
 [tool.coverage.run]
-source_pkgs = ["trellis_core", "trellis_events", "trellis_sdk", "trellis_cli", "trellis_notice_stats"]
+source_pkgs = ["trellis_core", "trellis_events", "trellis_sdk", "trellis_rag", "trellis_cli", "trellis_notice_stats"]
 branch = true
-relative_files = true  # CI tools map paths relative to workers/
+relative_files = true  # CI tools map paths relative to the repo root
 
 [tool.coverage.report]
 skip_empty = true

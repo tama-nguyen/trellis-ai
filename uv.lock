@@ -4,12 +4,13 @@ requires-python = "==3.12.*"
 
 [manifest]
 members = [
+    "trellis-ai-workspace",
     "trellis-cli",
     "trellis-core",
     "trellis-events",
     "trellis-notice-stats",
+    "trellis-rag",
     "trellis-sdk",
-    "trellis-workers-workspace",
 ]
 
 [[package]]
@@ -920,6 +921,51 @@ wheels = [
 ]
 
 [[package]]
+name = "trellis-ai-workspace"
+version = "0.0.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "trellis-cli" },
+    { name = "trellis-core" },
+    { name = "trellis-events", extra = ["kafka", "postgres"] },
+    { name = "trellis-notice-stats" },
+    { name = "trellis-rag" },
+    { name = "trellis-sdk" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "datamodel-code-generator" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+    { name = "time-machine" },
+    { name = "types-jsonschema" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "trellis-cli", editable = "packages/trellis-cli" },
+    { name = "trellis-core", editable = "packages/trellis-core" },
+    { name = "trellis-events", extras = ["kafka", "postgres"], editable = "packages/trellis-events" },
+    { name = "trellis-notice-stats", editable = "apps/notice-stats" },
+    { name = "trellis-rag", editable = "packages/trellis-rag" },
+    { name = "trellis-sdk", editable = "packages/trellis-sdk" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "datamodel-code-generator", specifier = "==0.96.0" },
+    { name = "mypy", specifier = "==1.18.2" },
+    { name = "pytest", specifier = "==8.4.2" },
+    { name = "pytest-cov", specifier = "==7.1.0" },
+    { name = "ruff", specifier = "==0.14.5" },
+    { name = "time-machine", specifier = "==2.19.0" },
+    { name = "types-jsonschema" },
+]
+
+[[package]]
 name = "trellis-cli"
 version = "0.1.0"
 source = { editable = "packages/trellis-cli" }
@@ -927,6 +973,7 @@ dependencies = [
     { name = "click" },
     { name = "trellis-core" },
     { name = "trellis-events" },
+    { name = "trellis-rag" },
     { name = "trellis-sdk" },
 ]
 
@@ -935,6 +982,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.1,<9" },
     { name = "trellis-core", editable = "packages/trellis-core" },
     { name = "trellis-events", editable = "packages/trellis-events" },
+    { name = "trellis-rag", editable = "packages/trellis-rag" },
     { name = "trellis-sdk", editable = "packages/trellis-sdk" },
 ]
 
@@ -997,7 +1045,7 @@ provides-extras = ["kafka", "postgres"]
 [[package]]
 name = "trellis-notice-stats"
 version = "0.1.0"
-source = { editable = "workers/notice-stats" }
+source = { editable = "apps/notice-stats" }
 dependencies = [
     { name = "trellis-core" },
     { name = "trellis-events" },
@@ -1021,6 +1069,17 @@ requires-dist = [
 provides-extras = ["kafka", "postgres"]
 
 [[package]]
+name = "trellis-rag"
+version = "0.1.0"
+source = { editable = "packages/trellis-rag" }
+dependencies = [
+    { name = "trellis-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "trellis-core", editable = "packages/trellis-core" }]
+
+[[package]]
 name = "trellis-sdk"
 version = "0.1.0"
 source = { editable = "packages/trellis-sdk" }
@@ -1033,49 +1092,6 @@ dependencies = [
 requires-dist = [
     { name = "httpx", specifier = ">=0.27,<1" },
     { name = "trellis-core", editable = "packages/trellis-core" },
-]
-
-[[package]]
-name = "trellis-workers-workspace"
-version = "0.0.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "trellis-cli" },
-    { name = "trellis-core" },
-    { name = "trellis-events", extra = ["kafka", "postgres"] },
-    { name = "trellis-notice-stats" },
-    { name = "trellis-sdk" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "datamodel-code-generator" },
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "ruff" },
-    { name = "time-machine" },
-    { name = "types-jsonschema" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "trellis-cli", editable = "packages/trellis-cli" },
-    { name = "trellis-core", editable = "packages/trellis-core" },
-    { name = "trellis-events", extras = ["kafka", "postgres"], editable = "packages/trellis-events" },
-    { name = "trellis-notice-stats", editable = "workers/notice-stats" },
-    { name = "trellis-sdk", editable = "packages/trellis-sdk" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "datamodel-code-generator", specifier = "==0.96.0" },
-    { name = "mypy", specifier = "==1.18.2" },
-    { name = "pytest", specifier = "==8.4.2" },
-    { name = "pytest-cov", specifier = "==7.1.0" },
-    { name = "ruff", specifier = "==0.14.5" },
-    { name = "time-machine", specifier = "==2.19.0" },
-    { name = "types-jsonschema" },
 ]
 
 [[package]]

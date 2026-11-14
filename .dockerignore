@@ -1,0 +1,26 @@
+# Build context for Dockerfile: the uv workspace plus the contract schemas the worker validates
+# against. Whitelist, so a new top-level directory does not silently end up in an image.
+**
+
+!pyproject.toml
+!uv.lock
+!packages/**
+!apps/**
+!contracts-snapshot/**
+
+# Tests are not installed into the image; the integration ones even start containers.
+tests/**
+
+# Never in any context, even inside re-included trees.
+**/.env
+**/.env.*
+**/.venv
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/*.egg-info
+**/.trellis
+coverage.xml
+.coverage

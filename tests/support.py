@@ -2,8 +2,10 @@
 
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-CONTRACTS_DIR = REPO_ROOT / "contracts"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+# The backend's contracts, mirrored here until the `trellis-contracts` package exists (decision
+# T22); contracts-snapshot/README.md says what changes then.
+CONTRACTS_DIR = REPO_ROOT / "contracts-snapshot"
 EXAMPLE_ENVELOPE = CONTRACTS_DIR / "examples" / "notice.published.v1.json"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 INVALID_ENVELOPE = FIXTURES / "invalid-notice.published.v1.json"

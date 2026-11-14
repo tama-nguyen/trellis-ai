@@ -1,0 +1,7 @@
+# Tool versions for this repo. `mise install` picks them up.
+# Python and uv only: trellis-ai has no Java or Node side (decision T21). uv fetches the
+# interpreter itself, so the python entry here is for anything run outside uv.
+[tools]
+# Decision T14.
+python = "3.12"
+uv = "0.13.8"

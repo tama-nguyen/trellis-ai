@@ -22,6 +22,7 @@ from pydantic import ValidationError
 from trellis_cli.agent_help import AgentAwareGroup
 from trellis_cli.commands.config import config_group
 from trellis_cli.commands.events import events_group
+from trellis_cli.commands.rag import rag_group
 from trellis_cli.commands.version import version_command
 from trellis_cli.commands.worker import worker_group
 from trellis_cli.output import CliState, OutputFormat
@@ -56,6 +57,7 @@ def cli(ctx: click.Context, output: str, profile: str | None, log_level: str | N
 cli.add_command(version_command)
 cli.add_command(events_group)
 cli.add_command(worker_group)
+cli.add_command(rag_group)
 cli.add_command(config_group)
 
 

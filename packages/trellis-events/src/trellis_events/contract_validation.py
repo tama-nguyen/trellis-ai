@@ -28,8 +28,15 @@ class ContractIssue:
     schema: str  # which schema file reported it, relative to contracts/
 
 
+#: Folder names searched upwards, in order. ``contracts-snapshot/`` is this repo's temporary mirror
+#: of the backend's contracts (decision T22); ``contracts/`` is a trellis-backend checkout sitting
+#: above us, or a mount in a container. Both go away once the ``trellis-contracts`` package ships
+#: the schemas as package data.
+CONTRACTS_DIR_NAMES: Final = ("contracts-snapshot", "contracts")
+
+
 def find_contracts_dir(start: Path | None = None) -> Path:
-    """``TRELLIS_CONTRACTS_DIR``, else the nearest ``contracts/`` above ``start`` (default: cwd)."""
+    """``TRELLIS_CONTRACTS_DIR``, else the nearest contracts folder above ``start`` (default: cwd)."""
     configured = get_settings().contracts_dir
     if configured is not None:
         if not (configured / ENVELOPE_SCHEMA).is_file():
@@ -39,10 +46,12 @@ def find_contracts_dir(start: Path | None = None) -> Path:
         return configured
     here = (start or Path.cwd()).resolve()
     for candidate in (here, *here.parents):
-        if (candidate / "contracts" / ENVELOPE_SCHEMA).is_file():
-            return candidate / "contracts"
+        for name in CONTRACTS_DIR_NAMES:
+            if (candidate / name / ENVELOPE_SCHEMA).is_file():
+                return candidate / name
+    names = " or ".join(f"{name}/{ENVELOPE_SCHEMA}" for name in CONTRACTS_DIR_NAMES)
     raise ConfigurationError(
-        "cannot find contracts/events/envelope.schema.json above the working directory; "
+        f"cannot find {names} above the working directory; "
         "set TRELLIS_CONTRACTS_DIR or pass --contracts-dir"
     )
 

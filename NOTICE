@@ -1,0 +1,26 @@
+Trellis AI
+Copyright the Trellis authors.
+
+This repository contains no file copied from DataHub
+(https://github.com/datahub-project/datahub, commit 1415bedd, (c) 2015 LinkedIn Corp. and DataHub
+contributors, Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0).
+
+The following patterns were re-implemented from scratch after reading DataHub; each module says so
+in its docstring, and no code was copied:
+
+- trellis_core.plugins        PluginRegistry and the metadata decorator
+                              (datahub.ingestion.api.registry / .decorators)
+- trellis_core.config         strict, secret-aware configuration base model
+                              (datahub.configuration.common.ConfigModel)
+- trellis_core.env_resolver   ${VAR} expansion in config files
+                              (datahub.configuration.config_loader)
+- trellis_core.report         bounded run reports and LossyList
+                              (SourceReport, LossyList)
+- trellis_core.instrumentation  ParamSpec + marker-attribute decorator
+                              (telemetry.with_telemetry; the telemetry itself is not reproduced)
+- trellis_events.pipeline.partition_executor  per-key ordered execution (PartitionExecutor)
+- tests/integration           containers started and removed by the test session
+                              (datahub.testing.docker_utils)
+
+If a file adapted from a third party is ever added here, it keeps its own license and gets an
+attribution header plus an entry in this file.

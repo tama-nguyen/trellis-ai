@@ -1,13 +1,14 @@
 [project]
 name = "trellis-cli"
 version = "0.1.0"
-description = "The `trellis` command line: validate events, run workers, inspect config."
+description = "The `trellis` command line: validate events, run workers, index and query a RAG store."
 requires-python = ">=3.12,<3.13"
 license = "Apache-2.0"
 dependencies = [
     "trellis-core",
     "trellis-events",
     "trellis-sdk",
+    "trellis-rag",
     "click>=8.1,<9",
 ]
 
@@ -18,6 +19,7 @@ trellis = "trellis_cli.main:run"
 trellis-core = { workspace = true }
 trellis-events = { workspace = true }
 trellis-sdk = { workspace = true }
+trellis-rag = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.9,<0.14"]
