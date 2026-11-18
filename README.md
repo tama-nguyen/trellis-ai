@@ -11,6 +11,28 @@ sample worker that shows the whole path.
 Read [AGENTS.md](AGENTS.md) before changing anything: it is the canonical guide for this repo, for
 humans and for agents alike.
 
+## Architecture
+
+The Python services in these diagrams are this repo. Figure 3 shows where they sit among the other two; Figures 7 and 17 are the retrieval path.
+
+### Figure 3: Trellis LMS system context
+
+Who uses the system, the modular monolith in the middle, the stores it owns and the event backbone to the Python consumers.
+
+![Figure 3: Trellis LMS system context](docs/figures/figure-03-system-context.png)
+
+### Figure 7: Authorized RAG architecture
+
+Access checks, permission-scoped retrieval, generation and cited answers.
+
+![Figure 7: Authorized RAG architecture](docs/figures/figure-07-authorized-rag.png)
+
+### Figure 17: How authorized RAG works at scale
+
+Authorize before retrieval, and validate cited sources before returning an answer.
+
+![Figure 17: How authorized RAG works at scale](docs/figures/figure-17-authorized-rag-at-scale.png)
+
 ## Sibling repos
 
 Trellis is three repos (decision T21); this one holds only the Python side.
