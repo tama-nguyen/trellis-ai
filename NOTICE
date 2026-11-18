@@ -1,9 +1,19 @@
 Trellis AI
 Copyright the Trellis authors.
 
-This repository contains no file copied from DataHub
-(https://github.com/datahub-project/datahub, commit 1415bedd, (c) 2015 LinkedIn Corp. and DataHub
-contributors, Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0).
+This product includes material adapted from DataHub
+(https://github.com/datahub-project/datahub), commit 1415bedd.
+(c) 2015 LinkedIn Corp. and DataHub contributors.
+Licensed under the Apache License, Version 2.0:
+http://www.apache.org/licenses/LICENSE-2.0
+
+Files adapted from DataHub (each carries an attribution header):
+
+- .claude/hooks/deny-git-no-verify.sh
+    from .claude/hooks/deny-git-no-verify.sh (near-verbatim)
+- .agent-skills/review/standards/python.md
+    rule format ("if X, then flag it, with this title") from .cursor/BUGBOT.md;
+    every rule is Trellis's own
 
 The following patterns were re-implemented from scratch after reading DataHub; each module says so
 in its docstring, and no code was copied:
@@ -21,6 +31,11 @@ in its docstring, and no code was copied:
 - trellis_events.pipeline.partition_executor  per-key ordered execution (PartitionExecutor)
 - tests/integration           containers started and removed by the test session
                               (datahub.testing.docker_utils)
+- .agent-skills/, .claude/    the agent-tooling layout: .agent-skills/<skill>/ with SKILL.md plus
+                              standards/ templates/ scripts/ references/ and name/description
+                              frontmatter, and a .claude/settings.json allowlist plus PreToolUse
+                              hook (DataHub .agent-skills/, .claude/). The allowlist, the skills
+                              and their contents are Trellis's own.
 
-If a file adapted from a third party is ever added here, it keeps its own license and gets an
-attribution header plus an entry in this file.
+Any further file adapted from a third party keeps its own license and gets an attribution header
+plus an entry in the list above.

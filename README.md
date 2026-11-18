@@ -66,7 +66,7 @@ good enough to exercise the pipeline, not a semantic model.
 
 ```bash
 TRELLIS_EVENTS_TRANSPORT=inmemory uv run trellis worker run notice-stats \
-  --input ../trellis-backend/contracts/examples/notice.published.v1.json
+  --input contracts-snapshot/examples/notice.published.v1.json
 ```
 
 Feed the same file twice and the counter still moves once: the inbox drops the duplicate, which is
