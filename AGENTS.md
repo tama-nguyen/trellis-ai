@@ -180,6 +180,9 @@ CLI runs in a bare checkout with no vector database and no model API.
 
 ## Contracts: this repo generates nothing (decision T22)
 
+Renaming a domain, or looking for the tool behind a generated file: read
+`../trellis-backend/docs/guide/rename-module.md` before searching the code.
+
 The backend owns `contracts/`. Its CI generates the pydantic event models and the OpenAPI client and
 publishes them as the PyPI package **`trellis-contracts`**, which this repo will pin. **There is no
 code generator in this repo** — do not look for one, and do not add one.
