@@ -26,21 +26,21 @@ class AppConfigResource:
         return models.AppConfig.model_validate_json(response.content)
 
 
-class NoticeResource:
-    """Operations tagged ``notice``."""
+class NotificationResource:
+    """Operations tagged ``notification``."""
 
     def __init__(self, http: TrellisHttpClient) -> None:
         self._http = http
 
-    def list_notices(
+    def list_notifications(
         self,
         *,
         first: int | None = None,
         after: str | None = None,
         audience: Literal["ALL", "STAFF"] | None = None,
         query: str | None = None,
-    ) -> models.NoticePage:
-        """``GET /api/notices``."""
+    ) -> models.NotificationPage:
+        """``GET /api/notifications``."""
         params: dict[str, str] = {}
         if first is not None:
             params["first"] = str(first)
@@ -50,51 +50,51 @@ class NoticeResource:
             params["audience"] = str(audience)
         if query is not None:
             params["query"] = query
-        response = self._http.request("GET", "/api/notices", params=params)
-        return models.NoticePage.model_validate_json(response.content)
+        response = self._http.request("GET", "/api/notifications", params=params)
+        return models.NotificationPage.model_validate_json(response.content)
 
-    def create_notice(self, body: models.NoticeContentRequest) -> models.NoticeView:
-        """``POST /api/notices``."""
+    def create_notification(self, body: models.NotificationContentRequest) -> models.NotificationView:
+        """``POST /api/notifications``."""
         response = self._http.request(
             "POST",
-            "/api/notices",
+            "/api/notifications",
             json=body.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
-        return models.NoticeView.model_validate_json(response.content)
+        return models.NotificationView.model_validate_json(response.content)
 
-    def get_notice(self, code: str) -> models.NoticeView:
-        """``GET /api/notices/{code}``."""
-        response = self._http.request("GET", f"/api/notices/{quote(str(code), safe='')}")
-        return models.NoticeView.model_validate_json(response.content)
+    def get_notification(self, code: str) -> models.NotificationView:
+        """``GET /api/notifications/{code}``."""
+        response = self._http.request("GET", f"/api/notifications/{quote(str(code), safe='')}")
+        return models.NotificationView.model_validate_json(response.content)
 
-    def update_notice(
-        self, code: str, body: models.NoticeContentRequest, *, if_match: str
-    ) -> models.NoticeView:
-        """``PUT /api/notices/{code}``."""
+    def update_notification(
+        self, code: str, body: models.NotificationContentRequest, *, if_match: str
+    ) -> models.NotificationView:
+        """``PUT /api/notifications/{code}``."""
         headers: dict[str, str] = {}
         headers["If-Match"] = if_match
         response = self._http.request(
             "PUT",
-            f"/api/notices/{quote(str(code), safe='')}",
+            f"/api/notifications/{quote(str(code), safe='')}",
             headers=headers,
             json=body.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
-        return models.NoticeView.model_validate_json(response.content)
+        return models.NotificationView.model_validate_json(response.content)
 
-    def archive_notice(self, code: str) -> models.NoticeView:
-        """``POST /api/notices/{code}/archive``."""
-        response = self._http.request("POST", f"/api/notices/{quote(str(code), safe='')}/archive")
-        return models.NoticeView.model_validate_json(response.content)
+    def archive_notification(self, code: str) -> models.NotificationView:
+        """``POST /api/notifications/{code}/archive``."""
+        response = self._http.request("POST", f"/api/notifications/{quote(str(code), safe='')}/archive")
+        return models.NotificationView.model_validate_json(response.content)
 
-    def publish_notice(self, code: str, *, idempotency_key: str | None = None) -> models.NoticeView:
-        """``POST /api/notices/{code}/publish``."""
+    def publish_notification(self, code: str, *, idempotency_key: str | None = None) -> models.NotificationView:
+        """``POST /api/notifications/{code}/publish``."""
         headers: dict[str, str] = {}
         if idempotency_key is not None:
             headers["Idempotency-Key"] = idempotency_key
         response = self._http.request(
-            "POST", f"/api/notices/{quote(str(code), safe='')}/publish", headers=headers
+            "POST", f"/api/notifications/{quote(str(code), safe='')}/publish", headers=headers
         )
-        return models.NoticeView.model_validate_json(response.content)
+        return models.NotificationView.model_validate_json(response.content)
 
 
 class OpsResource:
@@ -136,8 +136,8 @@ class GeneratedResources:
         return AppConfigResource(self.http)
 
     @cached_property
-    def notice(self) -> NoticeResource:
-        return NoticeResource(self.http)
+    def notification(self) -> NotificationResource:
+        return NotificationResource(self.http)
 
     @cached_property
     def ops(self) -> OpsResource:

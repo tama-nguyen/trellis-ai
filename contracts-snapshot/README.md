@@ -11,7 +11,7 @@ repo needs at runtime and in tests, so the repo works on its own:
 | Path | Used by |
 | --- | --- |
 | `events/envelope.schema.json`, `events/<eventType>/v<N>.schema.json` | `trellis_events.contract_validation`, `trellis events validate`, the worker's contract check |
-| `examples/notice.published.v1.json` | `trellis worker run notice-stats --input ...`, envelope tests |
+| `examples/notification.published.v1.json` | `trellis worker run notification-stats --input ...`, envelope tests |
 | `testdata/backoff.json`, `testdata/stable-id.json` | the vectors that must give the same results in Java and Python |
 
 **Never edit a file here.** Change the schema in trellis-backend, then refresh the mirror:

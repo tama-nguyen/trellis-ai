@@ -88,7 +88,7 @@ def test_plugin_meta_is_not_inherited() -> None:
 
 def test_sample_worker_is_discovered_from_its_entry_point() -> None:
     registry = worker_registry()
-    worker = registry.get("notice-stats")
+    worker = registry.get("notification-stats")
     assert issubclass(worker, WorkerDefinition)
     meta = get_plugin_meta(worker)
     assert meta is not None

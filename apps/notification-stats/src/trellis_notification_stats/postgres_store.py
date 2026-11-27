@@ -11,11 +11,13 @@ from psycopg_pool import ConnectionPool
 from trellis_events.inbox.postgres import PgConnection
 
 _UPSERT: Final = (
-    "INSERT INTO notice_stats_counter (counter_key, value) VALUES (%s, %s) "
+    "INSERT INTO notification_stats_counter (counter_key, value) VALUES (%s, %s) "
     "ON CONFLICT (counter_key) DO UPDATE "
-    "SET value = notice_stats_counter.value + EXCLUDED.value, updated_at = now()"
+    "SET value = notification_stats_counter.value + EXCLUDED.value, updated_at = now()"
 )
-_SELECT_ALL: Final = "SELECT counter_key, value FROM notice_stats_counter ORDER BY counter_key"
+_SELECT_ALL: Final = (
+    "SELECT counter_key, value FROM notification_stats_counter ORDER BY counter_key"
+)
 
 
 class PostgresCounterStore:
@@ -33,8 +35,8 @@ class PostgresCounterStore:
 
 def counter_dev_ddl() -> str:
     return (
-        files("trellis_notice_stats")
-        .joinpath("sql/notice_stats_counter.dev.sql")
+        files("trellis_notification_stats")
+        .joinpath("sql/notification_stats_counter.dev.sql")
         .read_text("utf-8")
     )
 

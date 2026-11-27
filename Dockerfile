@@ -4,8 +4,8 @@
 # is installed next to it and runs it: `trellis worker run <name>`.
 #
 #   docker buildx build \
-#     --build-arg WORKER_PACKAGE=trellis-notice-stats --build-arg WORKER_NAME=notice-stats \
-#     -t trellis/worker-notice-stats:local .
+#     --build-arg WORKER_PACKAGE=trellis-notification-stats --build-arg WORKER_NAME=notification-stats \
+#     -t trellis/worker-notification-stats:local .
 #
 # Build context = this repo's root (the uv workspace root), filtered by .dockerignore.
 # Adapted from trellis-backend's docker/worker.Dockerfile, whose context was the monorepo root.
@@ -38,7 +38,7 @@ ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     UV_PYTHON_DOWNLOADS=never \
     UV_PROJECT_ENVIRONMENT=/app/.venv
-ARG WORKER_PACKAGE=trellis-notice-stats
+ARG WORKER_PACKAGE=trellis-notification-stats
 ARG CLI_PACKAGE=trellis-cli
 # Space-separated extras of the worker package, e.g. "postgres". Kept explicit so the image carries
 # only the transports it runs with.
@@ -61,7 +61,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # ---------------------------------------------------------------------------------------------------
 FROM ${PYTHON_IMAGE} AS prod
-ARG WORKER_NAME=notice-stats
+ARG WORKER_NAME=notification-stats
 ARG VERSION=local
 ARG REVISION=unknown
 LABEL org.opencontainers.image.title="trellis-worker-${WORKER_NAME}" \

@@ -3,11 +3,11 @@
 The framework owns the source, the DLQ, retries, acknowledgement and shutdown; a worker only says
 which event types it consumes and supplies the filters, transformers and the action::
 
-    @plugin(name="notice-stats", description="...", config=NoticeStatsConfig)
-    class NoticeStatsWorker(WorkerDefinition):
+    @plugin(name="notification-stats", description="...", config=NotificationStatsConfig)
+    class NotificationStatsWorker(WorkerDefinition):
         def build(self, worker_config, ctx):
-            config = NoticeStatsConfig.model_validate(worker_config)
-            return WorkerParts(event_types=frozenset({"notice.published"}), action=...)
+            config = NotificationStatsConfig.model_validate(worker_config)
+            return WorkerParts(event_types=frozenset({"notification.published"}), action=...)
 
 Register it as an entry point in the ``trellis.workers`` group of the worker's ``pyproject.toml``.
 """

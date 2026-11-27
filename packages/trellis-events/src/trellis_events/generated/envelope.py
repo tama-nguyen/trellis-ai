@@ -51,7 +51,7 @@ class EventEnvelope(BaseModel):
         str,
         Field(
             alias="eventType",
-            description="<noun>.<past_verb>, e.g. notice.published. Also the logical topic name.",
+            description="<noun>.<past_verb>, e.g. notification.published. Also the logical topic name.",
             pattern="^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
         ),
     ]
@@ -67,7 +67,7 @@ class EventEnvelope(BaseModel):
         str,
         Field(
             alias="aggregateType",
-            description="PascalCase owner of the change, e.g. Notice.",
+            description="PascalCase owner of the change, e.g. Notification.",
             pattern="^[A-Z][A-Za-z0-9]*$",
         ),
     ]

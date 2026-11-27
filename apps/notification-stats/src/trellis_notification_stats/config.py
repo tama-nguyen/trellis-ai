@@ -1,4 +1,4 @@
-"""Configuration of the notice-stats worker (the ``[worker]`` section of its config file)."""
+"""Configuration of the notification-stats worker (the ``[worker]`` section of its config file)."""
 
 from enum import StrEnum
 
@@ -13,7 +13,7 @@ class StoreKind(StrEnum):
     POSTGRES = "postgres"
 
 
-class NoticeStatsConfig(ConfigModel):
+class NotificationStatsConfig(ConfigModel):
     store: StoreKind | None = None
     """``memory`` or ``postgres``. Default: ``postgres`` when a database URL is available
     (``postgres_dsn`` or ``TRELLIS_DATABASE_URL``), else ``memory`` (state dies with the process)."""

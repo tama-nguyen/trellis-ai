@@ -47,9 +47,9 @@ variables:
   DOCKER_DIND_IMAGE: "docker:29.9.3-dind@sha256:7bf70dcb85c822e3fa6f2d332143e474b99147b9d7b39102b0cfe8b04a7dd61b"
   ALPINE_IMAGE: "alpine:3.24.4@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf"
   # Worker image built from Dockerfile; one variable set per deployable when there are more.
-  WORKER_IMAGE_NAME: "worker-notice-stats"
-  WORKER_PACKAGE: "trellis-notice-stats"
-  WORKER_NAME: "notice-stats"
+  WORKER_IMAGE_NAME: "worker-notification-stats"
+  WORKER_PACKAGE: "trellis-notification-stats"
+  WORKER_NAME: "notification-stats"
   WORKER_EXTRAS: "postgres"
 
 default:

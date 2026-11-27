@@ -28,7 +28,7 @@ class Severity(StrEnum):
     CRITICAL = "CRITICAL"
 
 
-class NoticeContentRequest(BaseModel):
+class NotificationContentRequest(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
         populate_by_name=True,
@@ -45,7 +45,7 @@ class Status(StrEnum):
     ARCHIVED = "ARCHIVED"
 
 
-class NoticeSummary(BaseModel):
+class NotificationSummary(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
         populate_by_name=True,
@@ -59,7 +59,7 @@ class NoticeSummary(BaseModel):
     title: str
 
 
-class NoticeView(BaseModel):
+class NotificationView(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
         populate_by_name=True,
@@ -105,13 +105,13 @@ class Violation(BaseModel):
     message: str
 
 
-class NoticePage(BaseModel):
+class NotificationPage(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
         populate_by_name=True,
     )
     has_next: Annotated[bool, Field(alias="hasNext")]
-    items: list[NoticeSummary]
+    items: list[NotificationSummary]
     next_cursor: Annotated[str | None, Field(alias="nextCursor")] = None
 
 

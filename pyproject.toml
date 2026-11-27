@@ -13,7 +13,7 @@ dependencies = [
     "trellis-sdk",
     "trellis-rag",
     "trellis-cli",
-    "trellis-notice-stats",
+    "trellis-notification-stats",
 ]
 # Published contracts (decision T22). Backend CI generates the pydantic event models and the
 # OpenAPI client and publishes them to the GitLab Package Registry; this repo pins a version
@@ -54,7 +54,7 @@ trellis-events = { workspace = true }
 trellis-sdk = { workspace = true }
 trellis-rag = { workspace = true }
 trellis-cli = { workspace = true }
-trellis-notice-stats = { workspace = true }
+trellis-notification-stats = { workspace = true }
 
 # ---------------------------------------------------------------------------------------------
 # Ruff: lint + format. Conventions that matter are lint errors, not review comments.
@@ -126,7 +126,7 @@ quote-style = "double"
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-mypy_path = "$MYPY_CONFIG_FILE_DIR/packages/trellis-core/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-events/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-sdk/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-cli/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-rag/src:$MYPY_CONFIG_FILE_DIR/apps/notice-stats/src"
+mypy_path = "$MYPY_CONFIG_FILE_DIR/packages/trellis-core/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-events/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-sdk/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-cli/src:$MYPY_CONFIG_FILE_DIR/packages/trellis-rag/src:$MYPY_CONFIG_FILE_DIR/apps/notification-stats/src"
 files = ["packages/*/src", "apps/*/src", "tests"]
 explicit_package_bases = true
 disallow_any_explicit = true
@@ -160,7 +160,7 @@ filterwarnings = ["error"]
 xfail_strict = true
 
 [tool.coverage.run]
-source_pkgs = ["trellis_core", "trellis_events", "trellis_sdk", "trellis_rag", "trellis_cli", "trellis_notice_stats"]
+source_pkgs = ["trellis_core", "trellis_events", "trellis_sdk", "trellis_rag", "trellis_cli", "trellis_notification_stats"]
 branch = true
 relative_files = true  # CI tools map paths relative to the repo root
 

@@ -10,7 +10,7 @@ description: >
 
 The framework owns delivery — source, retries with backoff, DLQ, acknowledgement, offsets,
 shutdown. A worker supplies only the parts. The reference is `../../AGENTS.md` "Workers"; read it
-rather than guessing, and do not restate it here. `apps/notice-stats/` is the working example to
+rather than guessing, and do not restate it here. `apps/notification-stats/` is the working example to
 copy.
 
 ---
@@ -24,7 +24,7 @@ the read-only `uv run` commands pre-allowed by `.claude/settings.json`.
 
 ## 1. What a worker is made of
 
-At minimum three files under `apps/<name>/`, mirroring `apps/notice-stats/` (which splits the
+At minimum three files under `apps/<name>/`, mirroring `apps/notification-stats/` (which splits the
 action and its store into their own modules once they grow). `<name>` is hyphenated; the package
 directory is the underscored form, `src/trellis_<name_with_underscores>/`:
 
@@ -35,7 +35,7 @@ directory is the underscored form, `src/trellis_<name_with_underscores>/`:
 | `.../worker.py` | `@plugin(...) class X(WorkerDefinition)` whose `build()` validates the config and returns `WorkerParts(...)` |
 
 An example `<name>.example.toml` beside them documents the `[worker]` section, as
-`apps/notice-stats/notice-stats.example.toml` does.
+`apps/notification-stats/notification-stats.example.toml` does.
 
 ---
 

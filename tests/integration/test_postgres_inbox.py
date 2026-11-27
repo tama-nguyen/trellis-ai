@@ -18,8 +18,8 @@ from tests.support import EXAMPLE_ENVELOPE
 from trellis_cli.main import main
 from trellis_core.errors import ExitCode
 from trellis_events.inbox.postgres import PostgresInboxGuard
-from trellis_notice_stats.action import TOTAL_KEY
-from trellis_notice_stats.postgres_store import PostgresCounterStore
+from trellis_notification_stats.action import TOTAL_KEY
+from trellis_notification_stats.postgres_store import PostgresCounterStore
 
 pytestmark = pytest.mark.integration
 
@@ -29,7 +29,7 @@ EXAMPLE_EVENT_ID = uuid.UUID("01a1d97f-e500-7d85-a591-84b62830fb11")
 @pytest.fixture(autouse=True)
 def _empty_counters(postgres: PostgresContainer) -> None:
     with psycopg.connect(postgres.dsn) as conn:
-        conn.execute("TRUNCATE notice_stats_counter")
+        conn.execute("TRUNCATE notification_stats_counter")
 
 
 def _inbox_rows(postgres: PostgresContainer, consumer: str) -> int:
@@ -45,7 +45,7 @@ def _inbox_rows(postgres: PostgresContainer, consumer: str) -> int:
 def _total(postgres: PostgresContainer) -> int:
     with psycopg.connect(postgres.dsn) as conn:
         row = conn.execute(
-            "SELECT value FROM notice_stats_counter WHERE counter_key = %s", (TOTAL_KEY,)
+            "SELECT value FROM notification_stats_counter WHERE counter_key = %s", (TOTAL_KEY,)
         ).fetchone()
     return 0 if row is None else int(row[0])
 
@@ -56,7 +56,7 @@ def _run_worker(tmp_path: Path, consumer: str, *inputs: Path) -> int:
         f'[pipeline]\nconsumer_name = "{consumer}"\n'
         '[worker]\nstore = "postgres"\npostgres_dsn = "${TRELLIS_IT_DSN}"\n'
     )
-    args = ["worker", "run", "notice-stats", "--config", str(config)]
+    args = ["worker", "run", "notification-stats", "--config", str(config)]
     for path in inputs:
         args += ["--input", str(path)]
     return main(args)

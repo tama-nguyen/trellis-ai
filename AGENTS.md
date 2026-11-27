@@ -34,8 +34,8 @@ uv run pytest --cov              # same + coverage.xml (Cobertura, for CI)
 uv run pytest -m integration     # starts its own Postgres 17 container (needs Docker)
 uv run trellis --help            # the CLI
 uv run trellis worker list       # the registered workers, and why any are disabled
-uv run trellis worker run notice-stats --input contracts-snapshot/examples/notice.published.v1.json
-uv run trellis worker health notice-stats   # probe a running worker's /health/ready
+uv run trellis worker run notification-stats --input contracts-snapshot/examples/notification.published.v1.json
+uv run trellis worker health notification-stats   # probe a running worker's /health/ready
 uv run trellis events validate <file>...    # envelopes against contracts-snapshot/events
 uv run trellis rag index <file>... --store /tmp/trellis-rag.json
 uv run trellis rag query "..." --store /tmp/trellis-rag.json
@@ -159,7 +159,7 @@ shutdown. A worker supplies only the parts:
 
 `consumer_name` is the inbox key and the Kafka group id. Renaming it reprocesses the whole topic.
 
-Step by step, against the real `notice-stats` worker: `.agent-skills/new-worker/SKILL.md`.
+Step by step, against the real `notification-stats` worker: `.agent-skills/new-worker/SKILL.md`.
 
 ## RAG
 
@@ -211,14 +211,14 @@ forgotten.
 
 ```python
 with TrellisClient.from_env() as client:          # TRELLIS_API_URL + TRELLIS_API_TOKEN
-    page = client.notice.list_notices(first=50, audience="ALL")
-    view = client.notice.publish_notice(code, idempotency_key=str(uuid4()))
+    page = client.notification.list_notifications(first=50, audience="ALL")
+    view = client.notification.publish_notification(code, idempotency_key=str(uuid4()))
 ```
 
 Every generated method calls `TrellisHttpClient.request`, so retries, `Retry-After`, token refresh,
 correlation/trace headers and `ProblemDetail` -> `ApiError` apply; path parameters are URL-quoted;
 responses are validated into the models (unknown fields ignored, so additive API changes do not
-break workers). Resources are properties named after the OpenAPI tag (`client.notice`, `client.ops`,
+break workers). Resources are properties named after the OpenAPI tag (`client.notification`, `client.ops`,
 `client.app_config`).
 
 Workers consume **events**, not REST, for anything the backend publishes; use the client only to

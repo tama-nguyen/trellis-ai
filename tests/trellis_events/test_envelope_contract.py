@@ -11,12 +11,12 @@ from tests.support import CONTRACTS_DIR, EXAMPLE_ENVELOPE, INVALID_ENVELOPE
 from trellis_core.json_types import JsonObject
 from trellis_events.contract_validation import ContractValidator
 from trellis_events.envelope import Envelope
-from trellis_events.generated import notice_published_v1
-from trellis_events.generated.notice_published_v1 import NoticePublishedV1
+from trellis_events.generated import notification_published_v1
+from trellis_events.generated.notification_published_v1 import NotificationPublishedV1
 from trellis_events.payloads.registry import default_payload_registry
 
 ENVELOPE_SCHEMA = CONTRACTS_DIR / "events" / "envelope.schema.json"
-NOTICE_SCHEMA = CONTRACTS_DIR / "events" / "notice.published" / "v1.schema.json"
+NOTIFICATION_SCHEMA = CONTRACTS_DIR / "events" / "notification.published" / "v1.schema.json"
 FROZEN = datetime(2026, 11, 14, 10, 0, tzinfo=UTC)
 
 
@@ -36,25 +36,25 @@ def test_committed_example_is_valid() -> None:
 def test_round_trip_of_the_example_stays_valid() -> None:
     envelope = Envelope.from_bytes(EXAMPLE_ENVELOPE.read_bytes())
     payload = default_payload_registry().parse(envelope)
-    assert isinstance(payload, NoticePublishedV1)
+    assert isinstance(payload, NotificationPublishedV1)
     assert ContractValidator(CONTRACTS_DIR).validate(envelope.to_json()) == []
     dumped_payload = payload.model_dump(mode="json", by_alias=True, exclude_none=True)
-    assert list(_strict(_schema(NOTICE_SCHEMA)).iter_errors(dumped_payload)) == []
+    assert list(_strict(_schema(NOTIFICATION_SCHEMA)).iter_errors(dumped_payload)) == []
 
 
 @time_machine.travel(FROZEN, tick=False)
 def test_built_envelope_is_valid_and_utc() -> None:
-    payload = NoticePublishedV1(
-        notice_code="NT-7K2M-9QXA-4P8R",
+    payload = NotificationPublishedV1(
+        notification_code="NT-7K2M-9QXA-4P8R",
         title="t",
         published_at=FROZEN,
         published_by="admin@example.test",
     )
     envelope = Envelope.new(
-        event_type=notice_published_v1.EVENT_TYPE,
-        event_version=notice_published_v1.EVENT_VERSION,
-        aggregate_type="Notice",
-        aggregate_id=payload.notice_code,
+        event_type=notification_published_v1.EVENT_TYPE,
+        event_version=notification_published_v1.EVENT_VERSION,
+        aggregate_type="Notification",
+        aggregate_id=payload.notification_code,
         producer="trellis-tests",
         payload=payload.model_dump(mode="json", by_alias=True),
     )
@@ -65,14 +65,16 @@ def test_built_envelope_is_valid_and_utc() -> None:
 
 
 def test_payload_model_declares_the_schema_fields() -> None:
-    schema = _schema(NOTICE_SCHEMA)
+    schema = _schema(NOTIFICATION_SCHEMA)
     properties = schema["properties"]
     required = schema["required"]
     assert isinstance(properties, dict)
     assert isinstance(required, list)
-    aliases = {f.alias or name for name, f in NoticePublishedV1.model_fields.items()}
+    aliases = {f.alias or name for name, f in NotificationPublishedV1.model_fields.items()}
     required_aliases = {
-        f.alias or name for name, f in NoticePublishedV1.model_fields.items() if f.is_required()
+        f.alias or name
+        for name, f in NotificationPublishedV1.model_fields.items()
+        if f.is_required()
     }
     assert aliases == set(properties)
     assert required_aliases == set(required)

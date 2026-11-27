@@ -1,10 +1,10 @@
-# Example config for `trellis worker run notice-stats --config notice-stats.example.toml`.
+# Example config for `trellis worker run notification-stats --config notification-stats.example.toml`.
 # Containers usually need no file at all: without --config the same settings come from
 # TRELLIS_EVENTS_TRANSPORT, TRELLIS_KAFKA_BOOTSTRAP_SERVERS, TRELLIS_DATABASE_URL, TRELLIS_HEALTH_*.
 # ${VAR} is expanded from the environment; an unset variable stops the worker with exit 78.
 
 [pipeline]
-consumer_name = "notice-stats"     # inbox key and Kafka group.id: never rename casually
+consumer_name = "notification-stats"     # inbox key and Kafka group.id: never rename casually
 failure_mode = "CONTINUE"          # CONTINUE = dead-letter and move on; THROW = stop, do not ack
 concurrency = 1                    # >1 = parallel across aggregate ids, ordered within one
 
@@ -16,7 +16,7 @@ max_attempts = 4
 [transport]
 type = "kafka"
 bootstrap_servers = "${TRELLIS_KAFKA_BOOTSTRAP_SERVERS}"
-# topics defaults to the worker's event types: ["notice.published"]
+# topics defaults to the worker's event types: ["notification.published"]
 
 [worker]
 store = "postgres"
