@@ -1,4 +1,4 @@
 Mirror of trellis-backend/contracts (events, examples, testdata).
-source commit: 5350f413872315e2fba8a708dc89fcad9762c86a
-copied at:     2026-11-14T15:19:04Z
+source commit: d373e9f536eeb9a342857a392ab00a9d752603b2
+copied at:     2026-11-27T03:02:16Z
 Do not edit the files here; see contracts-snapshot/README.md.

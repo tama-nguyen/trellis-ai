@@ -44,7 +44,7 @@ def test_unknown_worker_is_unavailable() -> None:
 def test_unset_config_variable_is_a_config_error(tmp_path: Path) -> None:
     config = tmp_path / "worker.toml"
     config.write_text('[pipeline]\nconsumer_name = "${TRELLIS_TEST_UNSET_VARIABLE}"\n')
-    assert main(["worker", "run", "notice-stats", "--config", str(config), "--dry-run"]) == (
+    assert main(["worker", "run", "notification-stats", "--config", str(config), "--dry-run"]) == (
         ExitCode.CONFIG
     )
 
@@ -52,11 +52,11 @@ def test_unset_config_variable_is_a_config_error(tmp_path: Path) -> None:
 def test_invalid_config_is_a_config_error(tmp_path: Path) -> None:
     config = tmp_path / "worker.toml"
     config.write_text('[pipeline]\nconsumer_name = "Not Valid"\n')
-    assert main(["worker", "run", "notice-stats", "--config", str(config)]) == ExitCode.CONFIG
+    assert main(["worker", "run", "notification-stats", "--config", str(config)]) == ExitCode.CONFIG
 
 
 def test_dry_run_consumes_nothing(capsys: pytest.CaptureFixture[str]) -> None:
-    code = main(["--format", "json", "worker", "run", "notice-stats", "--dry-run"])
+    code = main(["--format", "json", "worker", "run", "notification-stats", "--dry-run"])
     assert code == ExitCode.OK
     assert _json_out(capsys)["dry_run"] is True
 
@@ -70,7 +70,7 @@ def test_duplicate_delivery_is_applied_once(capsys: pytest.CaptureFixture[str]) 
             "json",
             "worker",
             "run",
-            "notice-stats",
+            "notification-stats",
             "--input",
             example,
             "--input",
@@ -89,7 +89,15 @@ def test_invalid_event_is_dead_lettered_and_acknowledged(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     code = main(
-        ["--format", "json", "worker", "run", "notice-stats", "--input", str(INVALID_ENVELOPE)]
+        [
+            "--format",
+            "json",
+            "worker",
+            "run",
+            "notification-stats",
+            "--input",
+            str(INVALID_ENVELOPE),
+        ]
     )
     assert code == ExitCode.OK
     out = _json_out(capsys)
@@ -105,11 +113,20 @@ def test_dry_run_plan_never_prints_secrets(
     monkeypatch.setenv("TRELLIS_TEST_DSN", secret_dsn)
     config = tmp_path / "worker.toml"
     config.write_text(
-        '[pipeline]\nconsumer_name = "notice-stats"\n'
+        '[pipeline]\nconsumer_name = "notification-stats"\n'
         '[worker]\nstore = "postgres"\npostgres_dsn = "${TRELLIS_TEST_DSN}"\n'
     )
     code = main(
-        ["--format", "json", "worker", "run", "notice-stats", "--config", str(config), "--dry-run"]
+        [
+            "--format",
+            "json",
+            "worker",
+            "run",
+            "notification-stats",
+            "--config",
+            str(config),
+            "--dry-run",
+        ]
     )
     assert code == ExitCode.OK
     captured = capsys.readouterr()
@@ -118,11 +135,11 @@ def test_dry_run_plan_never_prints_secrets(
 
 def test_health_of_a_worker_that_is_not_running_is_unhealthy() -> None:
     # Port 1 is never a Trellis health endpoint; exit must be 1 (Docker reserves 2).
-    assert main(["worker", "health", "notice-stats", "--port", "1", "--timeout", "1"]) == (
+    assert main(["worker", "health", "notification-stats", "--port", "1", "--timeout", "1"]) == (
         ExitCode.FAILURE
     )
 
 
 def test_kafka_container_mode_needs_bootstrap_servers(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("TRELLIS_EVENTS_TRANSPORT", "kafka")
-    assert main(["worker", "run", "notice-stats", "--dry-run"]) == ExitCode.CONFIG
+    assert main(["worker", "run", "notification-stats", "--dry-run"]) == ExitCode.CONFIG

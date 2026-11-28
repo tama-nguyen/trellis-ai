@@ -1,7 +1,7 @@
 [project]
-name = "trellis-notice-stats"
+name = "trellis-notification-stats"
 version = "0.1.0"
-description = "Sample worker: counts published notices from notice.published v1, idempotent via the inbox."
+description = "Sample worker: counts published notifications from notification.published v1, idempotent via the inbox."
 requires-python = ">=3.12,<3.13"
 license = "Apache-2.0"
 dependencies = [
@@ -15,9 +15,9 @@ kafka = ["trellis-events[kafka]"]
 postgres = ["trellis-events[postgres]"]
 
 # Discovery is by entry point only: installing the package is what makes `trellis worker run
-# notice-stats` work. Nothing registers itself as an import side effect.
+# notification-stats` work. Nothing registers itself as an import side effect.
 [project.entry-points."trellis.workers"]
-notice-stats = "trellis_notice_stats.worker:NoticeStatsWorker"
+notification-stats = "trellis_notification_stats.worker:NotificationStatsWorker"
 
 [tool.uv.sources]
 trellis-core = { workspace = true }

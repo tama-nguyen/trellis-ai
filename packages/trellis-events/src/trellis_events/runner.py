@@ -3,7 +3,7 @@
 Config file (``.toml`` or ``.json``; ``${VAR}`` expanded, unset variables are errors)::
 
     [pipeline]
-    consumer_name = "notice-stats"
+    consumer_name = "notification-stats"
     failure_mode = "CONTINUE"        # or THROW
     [pipeline.retry]
     max_attempts = 4

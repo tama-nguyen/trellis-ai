@@ -52,7 +52,7 @@ def running_worker(
         }
     )
     shutdown = ShutdownSignal()
-    worker = build_worker("notice-stats", config, shutdown)
+    worker = build_worker("notification-stats", config, shutdown)
     exit_codes: list[ExitCode] = []
     thread = threading.Thread(target=lambda: exit_codes.append(worker.run()))
     thread.start()

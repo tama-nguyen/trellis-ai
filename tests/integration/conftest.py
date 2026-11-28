@@ -13,7 +13,7 @@ import psycopg
 import pytest
 
 from trellis_events.inbox.postgres import create_schema_for_dev
-from trellis_notice_stats.postgres_store import create_schema_for_dev as create_counter_schema
+from trellis_notification_stats.postgres_store import create_schema_for_dev as create_counter_schema
 
 POSTGRES_IMAGE = "postgres:17-alpine"
 STARTUP_TIMEOUT_S = 60

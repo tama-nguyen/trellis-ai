@@ -2,7 +2,7 @@
 
 Typed operations come from the OpenAPI-generated client (``trellis_sdk.generated``, built from
 ``contracts/openapi/openapi.json``): one property per backend resource, e.g.
-``client.notice.publish_notice(code, idempotency_key=key)``. Each resource calls
+``client.notification.publish_notification(code, idempotency_key=key)``. Each resource calls
 :attr:`TrellisClient.http`, so retries, 429, token refresh and typed ``ApiError``s apply. ``http`` stays
 available for endpoints outside the contract. Never hand-write per-endpoint models here: they belong to
 the generator's output.

@@ -23,7 +23,7 @@ _FORMAT_CHECKER = FormatChecker()
 
 @dataclass(frozen=True)
 class ContractIssue:
-    location: str  # JSON pointer-ish path, e.g. "payload/noticeCode"
+    location: str  # JSON pointer-ish path, e.g. "payload/notificationCode"
     message: str
     schema: str  # which schema file reported it, relative to contracts/
 

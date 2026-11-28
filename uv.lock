@@ -8,7 +8,7 @@ members = [
     "trellis-cli",
     "trellis-core",
     "trellis-events",
-    "trellis-notice-stats",
+    "trellis-notification-stats",
     "trellis-rag",
     "trellis-sdk",
 ]
@@ -928,7 +928,7 @@ dependencies = [
     { name = "trellis-cli" },
     { name = "trellis-core" },
     { name = "trellis-events", extra = ["kafka", "postgres"] },
-    { name = "trellis-notice-stats" },
+    { name = "trellis-notification-stats" },
     { name = "trellis-rag" },
     { name = "trellis-sdk" },
 ]
@@ -949,7 +949,7 @@ requires-dist = [
     { name = "trellis-cli", editable = "packages/trellis-cli" },
     { name = "trellis-core", editable = "packages/trellis-core" },
     { name = "trellis-events", extras = ["kafka", "postgres"], editable = "packages/trellis-events" },
-    { name = "trellis-notice-stats", editable = "apps/notice-stats" },
+    { name = "trellis-notification-stats", editable = "apps/notification-stats" },
     { name = "trellis-rag", editable = "packages/trellis-rag" },
     { name = "trellis-sdk", editable = "packages/trellis-sdk" },
 ]
@@ -1043,9 +1043,9 @@ requires-dist = [
 provides-extras = ["kafka", "postgres"]
 
 [[package]]
-name = "trellis-notice-stats"
+name = "trellis-notification-stats"
 version = "0.1.0"
-source = { editable = "apps/notice-stats" }
+source = { editable = "apps/notification-stats" }
 dependencies = [
     { name = "trellis-core" },
     { name = "trellis-events" },

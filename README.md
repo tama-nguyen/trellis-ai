@@ -57,7 +57,7 @@ publish, the generated copy lives in `contracts-snapshot/`; see AGENTS.md.
 | `packages/trellis-sdk` | typed HTTP client for the backend: connection reuse, retries that honour `429`/`Retry-After`, token refresh before expiry, backend `ProblemDetail` errors mapped to Python exceptions |
 | `packages/trellis-rag` | the RAG seams: `DocumentSource`, `Chunker`, `Embedder`, `VectorStore`, `Retriever`, with in-memory implementations so it runs and is testable with no external service |
 | `packages/trellis-cli` | the `trellis` command line |
-| `apps/notice-stats` | the sample worker: consumes `notice.published`, counts it exactly once |
+| `apps/notification-stats` | the sample worker: consumes `notification.published`, counts it exactly once |
 
 ## Quick start
 
@@ -87,8 +87,8 @@ good enough to exercise the pipeline, not a semantic model.
 ### A worker, with nothing else running
 
 ```bash
-TRELLIS_EVENTS_TRANSPORT=inmemory uv run trellis worker run notice-stats \
-  --input contracts-snapshot/examples/notice.published.v1.json
+TRELLIS_EVENTS_TRANSPORT=inmemory uv run trellis worker run notification-stats \
+  --input contracts-snapshot/examples/notification.published.v1.json
 ```
 
 Feed the same file twice and the counter still moves once: the inbox drops the duplicate, which is
@@ -106,11 +106,11 @@ cd ../trellis-backend && build-logic/scripts/dev/trellis-dev.sh up --profile ful
 export TRELLIS_EVENTS_TRANSPORT=kafka
 export TRELLIS_KAFKA_BOOTSTRAP_SERVERS=localhost:19092
 export TRELLIS_DATABASE_URL=postgresql://trellis:trellis@localhost:15432/trellis
-uv run trellis worker run notice-stats
+uv run trellis worker run notification-stats
 ```
 
 The worker serves `/health/live`, `/health/ready` and `/metrics` (Prometheus) on
-`TRELLIS_HEALTH_PORT`; `trellis worker health notice-stats` exits 0 only when it is ready, which is
+`TRELLIS_HEALTH_PORT`; `trellis worker health notification-stats` exits 0 only when it is ready, which is
 what the container healthcheck calls.
 
 Full walkthrough of all three repos: `../trellis-backend/docs/guide/running.md`.
@@ -131,7 +131,8 @@ read the vectors in `contracts/testdata/backoff.json`, so the two cannot drift a
 
 ## Quality gate
 
-Run this before opening a merge request; CI runs the same.
+Run this before opening a pull request; [GitHub CI](.github/workflows/ci.yml) runs the same.
+See [CI setup](docs/ci.md) for the manual `run_tests` switch and required checks.
 
 ```bash
 uv lock --check
