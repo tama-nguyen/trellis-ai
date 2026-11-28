@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: Run tests (automatic PR/push runs always test)
+        type: boolean
+        required: true
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  TZ: UTC
+
+jobs:
+  python:
+    name: Python build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78 # v5.3.0
+        with:
+          cache_save: ${{ github.ref_name == github.event.repository.default_branch }}
+      - name: Check lockfile and install workspace
+        run: |
+          uv lock --check
+          uv sync --locked
+      - name: Check source
+        run: |
+          uv run --locked ruff format --check
+          uv run --locked ruff check --output-format=github
+          uv run --locked mypy
+      - name: Run tooling and contract tests
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_tests }}
+        run: uv run --locked pytest --cov --junitxml=py-junit.xml
+      - name: Run Postgres integration tests
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_tests }}
+        run: |
+          docker info
+          uv run --locked pytest -m integration --junitxml=py-integration-junit.xml
+      - name: Build workspace distributions
+        run: uv build --all-packages
+      - name: Build worker container locally
+        run: >-
+          docker build --tag trellis/worker-notification-stats:ci
+          --build-arg WORKER_PACKAGE=trellis-notification-stats
+          --build-arg WORKER_NAME=notification-stats
+          --build-arg WORKER_EXTRAS=postgres
+          --build-arg VERSION=ci --build-arg REVISION="$GITHUB_SHA" .
+      - name: Upload verification reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: python-reports
+          path: |
+            coverage.xml
+            py-junit.xml
+            py-integration-junit.xml
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload distributions
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: python-packages
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7

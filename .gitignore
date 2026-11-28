@@ -20,6 +20,7 @@ build/
 coverage.xml
 .coverage
 py-junit.xml
+py-integration-junit.xml
 gl-code-quality-ruff.json
 
 # Local RAG indexes written by `trellis rag index` (default --store path)

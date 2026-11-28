@@ -22,6 +22,12 @@ tables.
 
 ## Commands
 
+Build-only GitHub Actions lives in `.github/workflows/ci.yml`; setup and manual `run_tests`
+behavior are documented in [docs/ci.md](docs/ci.md). Tool versions come from `mise.toml`.
+
+Do not duplicate runtime/tool versions in workflow YAML. Pin action dependencies by full SHA and
+maintain those pins with Dependabot.
+
 Run from the **repo root**. Always through `uv run`, so the locked tool versions apply.
 
 ```bash

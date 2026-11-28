@@ -131,7 +131,8 @@ read the vectors in `contracts/testdata/backoff.json`, so the two cannot drift a
 
 ## Quality gate
 
-Run this before opening a merge request; CI runs the same.
+Run this before opening a pull request; [GitHub CI](.github/workflows/ci.yml) runs the same.
+See [CI setup](docs/ci.md) for the manual `run_tests` switch and required checks.
 
 ```bash
 uv lock --check
